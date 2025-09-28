@@ -17,3 +17,27 @@ CREATE TABLE IF NOT EXISTS doctores (
 -- Insertar un doctor de prueba
 INSERT INTO doctores (nombre, apellido, sede, email, password)
 VALUES ('Juan', 'Pérez', 'Clínica Central', 'juan.perez@joeycare.com', '123456');
+
+
+SELECT * FROM doctores;
+
+CREATE TABLE pacientes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  apellido VARCHAR(100) NOT NULL,
+  fecha_nacimiento DATE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE ecografias (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  paciente_id INT NOT NULL,
+  filename VARCHAR(255) NOT NULL,
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (paciente_id) REFERENCES pacientes(id)
+);
+
+INSERT INTO pacientes (nombre, apellido, fecha_nacimiento) 
+VALUES ('Maria', 'Pérez', '2020-05-12');
+
+SELECT * FROM ecografias;
