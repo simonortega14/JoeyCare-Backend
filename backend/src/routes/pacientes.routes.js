@@ -3,10 +3,40 @@ import pool from "../db.js";
 
 const router = Router();
 
-// Obtener todos los pacientes
+// Obtener todos los pacientes con filtros opcionales
 router.get("/pacientes", async (req, res) => {
   try {
-    const [rows] = await pool.query("SELECT * FROM pacientes");
+    const { peso_min, peso_max, edad_gestacional_min, edad_gestacional_max, edad_corregida_min, edad_corregida_max } = req.query;
+
+    let query = "SELECT id, nombre, apellido, sexo, documento, fecha_nacimiento, edad_gestacional_sem, edad_corregida_sem, peso_nacimiento_g FROM pacientes WHERE 1=1";
+    let params = [];
+
+    if (peso_min) {
+      query += " AND peso_nacimiento_g >= ?";
+      params.push(parseFloat(peso_min));
+    }
+    if (peso_max) {
+      query += " AND peso_nacimiento_g <= ?";
+      params.push(parseFloat(peso_max));
+    }
+    if (edad_gestacional_min) {
+      query += " AND edad_gestacional_sem >= ?";
+      params.push(parseInt(edad_gestacional_min));
+    }
+    if (edad_gestacional_max) {
+      query += " AND edad_gestacional_sem <= ?";
+      params.push(parseInt(edad_gestacional_max));
+    }
+    if (edad_corregida_min) {
+      query += " AND edad_corregida_sem >= ?";
+      params.push(parseInt(edad_corregida_min));
+    }
+    if (edad_corregida_max) {
+      query += " AND edad_corregida_sem <= ?";
+      params.push(parseInt(edad_corregida_max));
+    }
+
+    const [rows] = await pool.query(query, params);
     res.json(rows);
   } catch (error) {
     console.error(error);
@@ -17,22 +47,27 @@ router.get("/pacientes", async (req, res) => {
 // Crear un nuevo paciente
 router.post("/pacientes", async (req, res) => {
   try {
-    const { nombre, apellido, fecha_nacimiento } = req.body;
+    const { nombre, apellido, sexo, documento, fecha_nacimiento, edad_gestacional_sem, edad_corregida_sem, peso_nacimiento_g } = req.body;
 
-    if (!nombre || !apellido) {
-      return res.status(400).json({ message: "Nombre y apellido son obligatorios" });
+    if (!nombre || !apellido || !sexo || !documento) {
+      return res.status(400).json({ message: "Nombre, apellido, sexo y documento son obligatorios" });
     }
 
     const [result] = await pool.query(
-      "INSERT INTO pacientes (nombre, apellido, fecha_nacimiento) VALUES (?, ?, ?)",
-      [nombre, apellido, fecha_nacimiento || null]
+      "INSERT INTO pacientes (nombre, apellido, sexo, documento, fecha_nacimiento, edad_gestacional_sem, edad_corregida_sem, peso_nacimiento_g) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [nombre, apellido, sexo, documento, fecha_nacimiento || null, edad_gestacional_sem || null, edad_corregida_sem || null, peso_nacimiento_g || null]
     );
 
     res.status(201).json({
       id: result.insertId,
       nombre,
       apellido,
+      sexo,
+      documento,
       fecha_nacimiento,
+      edad_gestacional_sem,
+      edad_corregida_sem,
+      peso_nacimiento_g,
     });
   } catch (error) {
     console.error(error);

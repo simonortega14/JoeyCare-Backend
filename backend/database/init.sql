@@ -25,7 +25,12 @@ CREATE TABLE pacientes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
   apellido VARCHAR(100) NOT NULL,
+  sexo ENUM('M', 'F') NOT NULL,
+  documento VARCHAR(50) UNIQUE NOT NULL,
   fecha_nacimiento DATE,
+  edad_gestacional_sem INT,
+  edad_corregida_sem INT,
+  peso_nacimiento_g DECIMAL(5,2),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
